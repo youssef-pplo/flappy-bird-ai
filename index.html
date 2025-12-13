@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Ultimate Flappy Bird AI Clone. Train a neural network to play or play yourself!">
+    <meta name="author" content="youssef pplo">
+    <meta name="keywords" content="flappy bird, neural network, AI, machine learning, game, browser game">
+    <meta name="theme-color" content="#e06020">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Flappy Bird Ultimate AI">
+    <meta property="og:description" content="Train a neural network to play Flappy Bird directly in your browser.">
+    <meta property="og:url" content="https://pplo.dev">
+    <meta property="og:site_name" content="Flappy Bird Ultimate AI">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Flappy Bird Ultimate AI">
+    <meta name="twitter:description" content="Train a neural network to play Flappy Bird directly in your browser.">
+    
+    <title>Flappy Bird Ultimate AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="score-display">0</div>
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- AI Dashboard (Draggable) -->
+    <div id="ai-dashboard">
+        <h3>NEURAL NET TRAINING</h3>
+        <div class="stat-row"><span>Generation:</span> <span id="dash-gen" class="stat-value">0</span></div>
+        <div class="stat-row"><span>Alive:</span> <span id="dash-alive" class="stat-value">0</span></div>
+        <div class="stat-row"><span>Best Score (All Time):</span> <span id="dash-best" class="stat-value">0</span></div>
+        <div class="stat-row"><span>Current Best:</span> <span id="dash-curr" class="stat-value">0</span></div>
+        
+        <div class="slider-container">
+            <div class="slider-label"><span>Training Speed</span><span id="speed-val">1x</span></div>
+            <input type="range" id="speed-slider" min="1" max="50" value="1" oninput="updateSpeed(this.value)">
+        </div>
+        
+        <div style="margin-top: 15px; display: grid; gap: 5px;">
+             <button class="btn btn-small btn-blue" onclick="showAiConfig()">AI Config</button>
+             <button class="btn btn-small btn-gray" onclick="game.endGame()">Exit Training</button>
+        </div>
+        <div style="margin-top:10px; font-size:10px; text-align:center; color:#777;">Drag to move</div>
+    </div>
+
+    <div id="ui-layer">
+        <!-- Start Screen -->
+        <div id="start-screen" class="message-box" style="display: block;">
+            <h1>Flappy AI</h1>
+            <p>Train a neural network or test your own skills!</p>
+            <div class="btn-group">
+                <button class="btn btn-green" onclick="startGame('normal')">Play Game</button>
+                <button class="btn btn-blue" onclick="startGame('ai')">Train AI</button>
+                <button class="btn btn-gray" onclick="showSettings()">Settings</button>
+            </div>
+            <div class="credits">
+                Created by <a href="https://pplo.dev" target="_blank" rel="noopener noreferrer">youssef pplo</a>
+            </div>
+        </div>
+
+        <!-- Global Settings Modal -->
+        <div id="settings-modal" class="message-box">
+            <h3>Game Settings</h3>
+            
+            <div class="setting-group">
+                <label>Graphics Quality</label>
+                <div class="toggle-container" id="gfx-toggle">
+                    <div class="toggle-btn" onclick="setGraphics('LOW')">Low (Fast)</div>
+                    <div class="toggle-btn active" onclick="setGraphics('HIGH')">High (Fancy)</div>
+                </div>
+                <p style="font-size: 0.8rem; margin:0;">Low mode disables particles and parallax for better battery/performance.</p>
+            </div>
+            <div class="btn-group" style="margin-top: 20px;">
+                <button class="btn" onclick="closeSettings()">Save & Back</button>
+            </div>
+        </div>
+
+        <!-- AI Config Modal -->
+        <div id="ai-config-modal" class="message-box">
+            <h3>AI Configuration</h3>
+            <div class="setting-group">
+                <label>Population Size (20 - 1500)</label>
+                <input type="number" id="cfg-pop" value="150" min="20" max="1500">
+            </div>
+            <div class="setting-group">
+                <label>Mutation Rate (0.01 - 0.5)</label>
+                <input type="number" id="cfg-mut" value="0.1" step="0.01" min="0.01" max="0.5">
+            </div>
+            <div class="setting-group">
+                <label>Elitism (Top % survive)</label>
+                <input type="number" id="cfg-elite" value="2" min="0" max="10">
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-green" onclick="saveAiSettings()">Apply & Restart AI</button>
+                <button class="btn btn-gray" onclick="closeAiConfig()">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="message-box">
+            <h1>Game Over</h1>
+            <div class="score-label" style="font-size: 1.2rem; color: #555;">Score</div>
+            <div style="font-size: 3rem; font-weight: bold; color: var(--primary); margin-bottom: 10px;" id="final-score">0</div>
+            <div class="score-label" style="font-size: 1rem; color: #888;">Best: <span id="best-score">0</span></div>
+            
+            <div class="btn-group" style="margin-top: 20px;">
+                <button class="btn" onclick="game.reset()">Try Again</button>
+                <button class="btn btn-blue" onclick="showMainMenu()">Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
