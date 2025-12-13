@@ -13,8 +13,8 @@ const CONSTANTS = {
     PIPE_SPEED: 2.5,
     PIPE_SPAWN_RATE: 100,
     BIRD_SIZE: 24,
-    MIN_GAP: 110,
-    MAX_GAP: 160
+    MIN_GAP: 110, // Minimum gap (bird size 24px, so 110px ensures passability with margin)
+    MAX_GAP: 160  // Maximum gap for variety
 };
 
 // --- Audio System ---
@@ -304,18 +304,47 @@ const pipes = {
     },
     update: function() {
         if (this.timer % CONSTANTS.PIPE_SPAWN_RATE === 0) {
-            const minPipe = 50;
-            const currentGap = Math.floor(Math.random() * (CONSTANTS.MAX_GAP - CONSTANTS.MIN_GAP + 1)) + CONSTANTS.MIN_GAP;
-            const maxPipe = canvas.height - 20 - currentGap - 50;
-            const topHeight = Math.floor(Math.random() * (maxPipe - minPipe + 1)) + minPipe;
+            const floorHeight = 20; // Ground height
+            const minTopMargin = 30; // Minimum space from top
+            const minBottomMargin = 30; // Minimum space from bottom
+            const availableHeight = canvas.height - floorHeight - minTopMargin - minBottomMargin;
             
-            this.items.push({ 
-                x: canvas.width, 
-                topHeight: topHeight, 
-                width: 52, 
-                gap: currentGap,
-                passed: false 
-            });
+            // Ensure gap is always passable (at least bird size * 2 + safety margin)
+            const minSafeGap = CONSTANTS.BIRD_SIZE * 2 + 40; // Minimum safe gap (88px for 24px bird)
+            const maxSafeGap = Math.min(CONSTANTS.MAX_GAP, availableHeight - 20); // Don't exceed available space
+            
+            // Use the larger of MIN_GAP or minSafeGap to ensure passability
+            const effectiveMinGap = Math.max(CONSTANTS.MIN_GAP, minSafeGap);
+            
+            // Ensure we have a valid range
+            if (maxSafeGap >= effectiveMinGap) {
+                const currentGap = Math.floor(Math.random() * (maxSafeGap - effectiveMinGap + 1)) + effectiveMinGap;
+                const safeGap = currentGap;
+                
+                // Calculate maximum top pipe height (ensuring bottom pipe has enough space)
+                const maxTopHeight = canvas.height - floorHeight - safeGap - minBottomMargin;
+                const minTopHeight = minTopMargin;
+                
+                // Ensure we have valid range
+                if (maxTopHeight >= minTopHeight) {
+                    const topHeight = Math.floor(Math.random() * (maxTopHeight - minTopHeight + 1)) + minTopHeight;
+                    
+                    // Double-check: verify the gap is actually passable
+                    const bottomPipeTop = topHeight + safeGap;
+                    const bottomPipeHeight = canvas.height - floorHeight - bottomPipeTop;
+                    
+                    // Only add pipe if it's definitely passable
+                    if (bottomPipeHeight >= minBottomMargin && topHeight >= minTopMargin) {
+                        this.items.push({ 
+                            x: canvas.width, 
+                            topHeight: topHeight, 
+                            width: 52, 
+                            gap: safeGap,
+                            passed: false 
+                        });
+                    }
+                }
+            }
         }
         this.timer++;
 
